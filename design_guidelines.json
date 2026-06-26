@@ -1,0 +1,90 @@
+{
+  "theme": "Light",
+  "archetype": "Archetype 4 (Swiss & High-Contrast)",
+  "rationale": "For a municipal service 'Uber for Garbage' app, the UI must balance absolute authority and clarity (Swiss High-Contrast) with the urgency of logistics. Using Stark White, Asphalt Gray, and Safety Orange instead of cliché 'eco-green' makes it feel like a modern, serious operations tool while remaining approachable for residents.",
+  "colors": {
+    "background": "#FAFAFA",
+    "surface": "#FFFFFF",
+    "primary": "#FF5A00",
+    "primary_hover": "#E04F00",
+    "secondary": "#0A0A0A",
+    "secondary_hover": "#222222",
+    "accent": "#002FA7",
+    "text_main": "#0A0A0A",
+    "text_muted": "#555555",
+    "border": "#E5E5E5",
+    "status_success": "#16A34A",
+    "status_warning": "#FFB300",
+    "status_error": "#DC2626"
+  },
+  "typography": {
+    "headings": {
+      "font_family": "Outfit, sans-serif",
+      "weight_strategy": "Bold/Black for emphasis, tight tracking (tracking-tight)"
+    },
+    "body": {
+      "font_family": "Manrope, sans-serif",
+      "weight_strategy": "Regular/Medium for readability, leading-relaxed"
+    },
+    "scales": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tight leading-none",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl tracking-tight",
+      "h3": "text-xl sm:text-2xl font-bold",
+      "body": "text-base text-text_main",
+      "label": "text-xs font-bold uppercase tracking-[0.2em] text-text_muted"
+    }
+  },
+  "layout_and_spacing": {
+    "philosophy": "Generous Spacing + Control Room Grid",
+    "containers": "Padding p-6 or p-8 inside bordered containers.",
+    "dashboards": "Control Room Grid: Base grid-cols-1 md:grid-cols-3 lg:grid-cols-4 with gap-6. Every pixel utilized, h-full on children.",
+    "alignment": "Left-align dense content and forms. Center-align only major empty states or single CTA screens."
+  },
+  "surfaces_and_micro_themes": {
+    "dashboards": "Flat background, 1px subtle border (border-border), no shadow. Hover: slight lift (-translate-y-1).",
+    "header": "Crystal Glass: bg-white/80 backdrop-blur-xl border-b border-black/5. 1px delicate inner stroke.",
+    "buttons": "Sharp corners or max 4px radius. High contrast."
+  },
+  "components": {
+    "strategy": "Shadcn UI heavily customized for .js/.jsx usage. Sharp edges (rounded-sm or rounded-none). Flat UI, no card shadows, only 1px borders.",
+    "inputs": "Shadcn inputs with strict validation states. Sharp corners.",
+    "maps": "Integrate Google Maps with a custom SnazzyMaps style (high-contrast grayscale with bright orange/blue accents for routes).",
+    "icons": "Phosphor Icons (@phosphor-icons/react) for high-end duotone or bold fill."
+  },
+  "interactions": {
+    "hover": "Explicit hover states with color shifts (e.g., hover:bg-slate-900 hover:text-white).",
+    "focus": "High contrast focus rings (focus:ring-2 focus:ring-primary focus:outline-none)."
+  },
+  "accessibility_and_testing": {
+    "contrast": "Ensure minimum 4.5:1 ratio.",
+    "testing": "MANDATORY data-testid attributes on ALL interactive elements (e.g., data-testid='login-button', data-testid='pickup-request-form')."
+  },
+  "media": {
+    "image_urls": [
+      {
+        "url": "https://images.unsplash.com/photo-1635691315495-ff39debe5764?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MjJ8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBnYXJiYWdlJTIwdHJ1Y2slMjBjaXR5fGVufDB8fHx8MTc4MjUwNTMzN3ww&ixlib=rb-4.1.0&q=85",
+        "description": "Modern orange garbage truck parked on road",
+        "category": "hero_background"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1498141321056-776a06214e24?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NDh8MHwxfHNlYXJjaHwxfHxjbGVhbiUyMGNpdHklMjBtYXAlMjB0b3AlMjBkb3duJTIwdmlld3xlbnwwfHx8fDE3ODI1MDUzMzd8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Bird's eye view of city map",
+        "category": "map_placeholder"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1781243680823-aae6c7f1ff12?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1ODR8MHwxfHNlYXJjaHwyfHxyZWN5Y2xpbmclMjBzb3J0aW5nJTIwZmFjaWxpdHl8ZW58MHx8fHwxNzgyNTA1MzM3fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Compressed bales of mixed paper waste / texture",
+        "category": "texture_background"
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Do NOT use 'Inter' for headings. Use Outfit for headings and Manrope for body. Apply from Google Fonts.",
+    "Implement Google Maps for Resident ETA tracking and Driver route mapping.",
+    "All components must be configured for .jsx / JavaScript React, not TypeScript.",
+    "All forms MUST use customized Shadcn UI elements with sharp corners (rounded-none or rounded-sm).",
+    "Avoid generic green/eco branding. Stick to the stark white, deep black, and safety orange palette to convey a modern logistics/ops feel.",
+    "Driver and Admin dashboards must utilize the 'Control Room' dense grid pattern, prioritizing operational action over static reporting.",
+    "Always apply 'data-testid' to critical elements (e.g., data-testid='login-submit-button', data-testid='map-marker-truck', data-testid='special-pickup-form')."
+  ]
+}
