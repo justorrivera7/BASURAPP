@@ -1,0 +1,45 @@
+{
+  "summary": "End-to-end testing of Recolecta (Uber-for-garbage) — 20/20 backend pytest tests passed; full UI verification for Landing, Login (OTP mock), Resident, Driver and Admin dashboards passed with no JS errors.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "tests parallelism", "issue": "pytest-xdist (configured in /app/backend/pytest.ini with -n auto) caused a race on the shared db.otps collection when multiple workers exercise the same seeded phone — tests still pass when run with `-o addopts=''` (single-process). Not an app bug, but the OTP overwrite-on-request semantics (per-phone single code) is inherently race-prone for parallel automation."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Landing", "issues": ["Hero text 'UBER PARA LA BASURA' is split across two lines with 'BASURA' inside an orange highlight box — visually correct and matches the requested aesthetic."]},
+      {"screen": "Resident dashboard", "issues": ["Map fallback explicitly labelled 'MAPA SIMULADO · FALTA GOOGLE MAPS KEY' which is expected per agent_to_agent_context_note."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_recolecta_api.py",
+    "/app/test_reports/pytest/recolecta_results.xml"
+  ],
+  "action_items": [
+    "(Optional) Consider switching pytest.ini default from `-n auto` to single-process for OTP-based suites, OR namespace test phones per worker. Not required — testing already works with -o addopts=''.",
+    "(Optional) The TestSpecialPickups.test_resident_create_pickup_and_notification function ends with `return sp['id']` which triggers a PytestReturnNotNoneWarning. Replace with `assert` for cleanliness."
+  ],
+  "critical_code_review_comments": [
+    "server.py is one ~560-line monolith. As routes grow, consider splitting into routers (auth, trucks, routes, special_pickups, admin) for maintainability.",
+    "All endpoints correctly project `_id: 0` away from Mongo results — no ObjectId leakage observed.",
+    "JWT secret falls back to a hard-coded default if JWT_SECRET env var is unset. Acceptable for demo but should be required in prod.",
+    "OTP storage uses upsert keyed on phone, so a fresh request-otp overwrites any pending code; for production this is fine (per-phone latest code wins) but for parallel test execution it causes races (see backend_issues.minor).",
+    "Pydantic models use Field(default_factory=uuid.uuid4) and ConfigDict(extra='ignore') — good.",
+    "require_role correctly returns 403 (verified: resident & driver both get 403 on /api/admin/stats).",
+    "ResidentDashboard's edit-address modal inputs do not have data-testid attributes (address/lat/lng fields), unlike the create-pickup modal which does. Low-priority test-friendliness gap."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_recolecta_api.py (new)"
+  ],
+  "success_rate": {"backend": "100% (20/20)", "frontend": "100% of requested flows (landing, OTP login for 3 roles, resident ETA + map + special pickup + edit-address modal, driver toggle-sharing + mark-collected, admin stats + schedule-pickup + create-truck)"},
+  "test_credentials": "5550000001 admin, 5550000002 driver (Juan, truck CDMX-001 on_route), 5550000004 resident (Carlos, has lat/lng). OTP mock_code returned in /api/auth/request-otp body and rendered via [data-testid=login-mock-code].",
+  "seed_data_creation": "Tests created several `TEST_`-prefixed special pickups and trucks (TEST-UI99, TEST-XXXXX); not auto-cleaned. Not harmful, but admin stats count will reflect them.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Run backend tests with `cd /app && python -m pytest backend/tests/test_recolecta_api.py -v -o addopts='' --junitxml=/app/test_reports/pytest/recolecta_results.xml`. The pytest.ini default uses `-n auto` which causes OTP races — override addopts to run single-process. Resident phone 5550000004 is seeded with address near CDMX center and truck CDMX-001 is seeded as `on_route` so /api/resident/eta returns available:true immediately. Google Maps key is intentionally empty — the simulated fallback (data-testid='map-view' with truck/home divs) IS the expected behavior.",
+  "rca of the issue": "No application bugs found. Only a test-environment race in pytest-xdist (multiple workers calling request-otp for the same seeded phone overwrite the OTP row before the other worker verifies). Mitigation already applied in our run by overriding addopts to disable xdist."
+}
