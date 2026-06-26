@@ -163,7 +163,12 @@ const AdminDashboard = () => {
               const truck = trucks.find((t) => t.id === r.truck_id);
               return (
                 <div key={r.id} className="border border-black/10 p-3" data-testid={`admin-route-${r.id}`}>
-                  <div className="font-bold">{r.name}</div>
+                  <div className="flex items-center justify-between">
+                    <div className="font-bold">{r.name}</div>
+                    {r.start_time && (
+                      <span className="font-mono-rc text-xs bg-[#0a0a0a] text-white px-2 py-0.5">{r.start_time}</span>
+                    )}
+                  </div>
                   <div className="text-xs text-neutral-600">{r.date} · {truck?.plate || r.truck_id}</div>
                   <div className="text-xs mt-1">{r.stops.length} paradas · <span className="font-bold">{r.status}</span></div>
                 </div>
@@ -234,6 +239,7 @@ const CreateRouteModal = ({ trucks, onClose, onCreated }) => {
   const [name, setName] = useState("Ruta " + new Date().toISOString().slice(0, 10));
   const [truckId, setTruckId] = useState(trucks[0]?.id || "");
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [startTime, setStartTime] = useState("07:00");
   const [stopsText, setStopsText] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -241,16 +247,19 @@ const CreateRouteModal = ({ trucks, onClose, onCreated }) => {
     if (!truckId) { toast.error("Selecciona camión"); return; }
     const lines = stopsText.split("\n").map((l) => l.trim()).filter(Boolean);
     const stops = lines.map((line) => {
-      const [address, lat, lng] = line.split("|").map((s) => s.trim());
-      return {
+      const parts = line.split("|").map((s) => s.trim());
+      const [address, lat, lng, time] = parts;
+      const obj = {
         address: address || "Sin dirección",
         lat: parseFloat(lat) || 19.4326,
         lng: parseFloat(lng) || -99.1332,
       };
+      if (time && /^\d{1,2}:\d{2}$/.test(time)) obj.scheduled_time = time;
+      return obj;
     });
     setSaving(true);
     try {
-      await api.post("/routes", { truck_id: truckId, name, date, stops });
+      await api.post("/routes", { truck_id: truckId, name, date, start_time: startTime, stops });
       toast.success("Ruta creada");
       onCreated();
     } catch (e) {
@@ -263,28 +272,35 @@ const CreateRouteModal = ({ trucks, onClose, onCreated }) => {
     <Modal title="Nueva ruta" onClose={onClose}>
       <div className="space-y-4">
         <Field label="Nombre">
-          <input value={name} onChange={(e) => setName(e.target.value)} className="w-full py-2 outline-none" />
+          <input data-testid="route-name-input" value={name} onChange={(e) => setName(e.target.value)} className="w-full py-2 outline-none" />
         </Field>
         <div>
           <div className="rc-label mb-2">Camión</div>
-          <select value={truckId} onChange={(e) => setTruckId(e.target.value)} className="w-full border border-black/20 bg-white px-3 py-2">
+          <select data-testid="route-truck-select" value={truckId} onChange={(e) => setTruckId(e.target.value)} className="w-full border border-black/20 bg-white px-3 py-2">
             {trucks.map((t) => <option key={t.id} value={t.id}>{t.plate} · {t.driver_name || "—"}</option>)}
           </select>
         </div>
-        <Field label="Fecha">
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full py-2 outline-none font-mono-rc" />
-        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Fecha">
+            <input data-testid="route-date-input" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full py-2 outline-none font-mono-rc" />
+          </Field>
+          <Field label="Hora de inicio">
+            <input data-testid="route-start-time-input" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="w-full py-2 outline-none font-mono-rc" />
+          </Field>
+        </div>
         <div>
-          <div className="rc-label mb-2">Paradas (una por línea: dirección | lat | lng)</div>
+          <div className="rc-label mb-2">Paradas (una por línea: dirección | lat | lng | hora HH:MM)</div>
           <textarea
-            rows={5}
+            data-testid="route-stops-textarea"
+            rows={6}
             value={stopsText}
             onChange={(e) => setStopsText(e.target.value)}
             className="w-full border border-black/20 bg-white p-3 outline-none font-mono-rc text-sm"
-            placeholder={"Calle 1, 100 | 19.4330 | -99.1340\nAv Reforma 222 | 19.4350 | -99.1320"}
+            placeholder={"Calle 1, 100 | 19.4330 | -99.1340 | 07:15\nAv Reforma 222 | 19.4350 | -99.1320 | 07:30"}
           />
+          <div className="text-[11px] text-neutral-500 mt-1">La hora HH:MM es opcional pero recomendada — el conductor verá la hora estimada de cada recogida.</div>
         </div>
-        <button onClick={save} disabled={saving} className="bg-[#ff5a00] hover:bg-[#e04f00] text-white px-5 py-3 text-xs uppercase tracking-widest font-bold disabled:opacity-50">
+        <button data-testid="route-save-button" onClick={save} disabled={saving} className="bg-[#ff5a00] hover:bg-[#e04f00] text-white px-5 py-3 text-xs uppercase tracking-widest font-bold disabled:opacity-50">
           {saving ? "Creando..." : "Crear ruta"}
         </button>
       </div>

@@ -102,6 +102,7 @@ class Stop(BaseModel):
     order: int
     status: Literal['pending', 'collected', 'skipped'] = 'pending'
     eta_minutes: Optional[int] = None
+    scheduled_time: Optional[str] = None  # "HH:MM" — hora estimada de recogida
 
 
 class Route(BaseModel):
@@ -110,6 +111,7 @@ class Route(BaseModel):
     truck_id: str
     name: str
     date: str
+    start_time: Optional[str] = None  # "HH:MM" — hora de inicio del recorrido
     stops: List[Stop] = []
     status: Literal['scheduled', 'in_progress', 'completed'] = 'scheduled'
     created_at: str = Field(default_factory=now_iso)
@@ -119,6 +121,7 @@ class RouteCreateIn(BaseModel):
     truck_id: str
     name: str
     date: str
+    start_time: Optional[str] = None
     stops: List[dict] = []
 
 
@@ -332,8 +335,14 @@ async def list_routes(user: dict = Depends(get_current_user)):
 
 @api_router.post("/routes")
 async def create_route(payload: RouteCreateIn, user: dict = Depends(require_role('admin'))):
-    stops = [Stop(**s, order=i).model_dump() for i, s in enumerate(payload.stops)]
-    route = Route(truck_id=payload.truck_id, name=payload.name, date=payload.date, stops=stops)
+    stops = [Stop(**{**s, "order": i}).model_dump() for i, s in enumerate(payload.stops)]
+    route = Route(
+        truck_id=payload.truck_id,
+        name=payload.name,
+        date=payload.date,
+        start_time=payload.start_time,
+        stops=stops,
+    )
     await db.routes.insert_one(route.model_dump())
     return route.model_dump()
 
@@ -541,12 +550,12 @@ async def seed_demo_data():
 
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         stops = [
-            Stop(address="Calle Hidalgo 10", lat=center_lat + 0.002, lng=center_lng + 0.002, order=0, eta_minutes=8).model_dump(),
-            Stop(address="Av. Juárez 55", lat=center_lat + 0.004, lng=center_lng + 0.003, order=1, eta_minutes=18).model_dump(),
-            Stop(address="Calle Madero 12", lat=center_lat + 0.006, lng=center_lng + 0.005, order=2, eta_minutes=28).model_dump(),
-            Stop(address="Plaza República 1", lat=center_lat + 0.008, lng=center_lng + 0.007, order=3, eta_minutes=38).model_dump(),
+            Stop(address="Calle Hidalgo 10", lat=center_lat + 0.002, lng=center_lng + 0.002, order=0, eta_minutes=8, scheduled_time="07:15").model_dump(),
+            Stop(address="Av. Juárez 55", lat=center_lat + 0.004, lng=center_lng + 0.003, order=1, eta_minutes=18, scheduled_time="07:30").model_dump(),
+            Stop(address="Calle Madero 12", lat=center_lat + 0.006, lng=center_lng + 0.005, order=2, eta_minutes=28, scheduled_time="07:45").model_dump(),
+            Stop(address="Plaza República 1", lat=center_lat + 0.008, lng=center_lng + 0.007, order=3, eta_minutes=38, scheduled_time="08:00").model_dump(),
         ]
-        route1 = Route(truck_id=truck1['id'], name="Ruta Centro AM", date=today, stops=stops, status='in_progress').model_dump()
+        route1 = Route(truck_id=truck1['id'], name="Ruta Centro AM", date=today, start_time="07:00", stops=stops, status='in_progress').model_dump()
         await db.routes.insert_one(route1)
 
         logger.info("Demo data seeded.")

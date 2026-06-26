@@ -137,7 +137,14 @@ const DriverDashboard = () => {
           </div>
 
           <div className="lg:col-span-2 rc-card p-6">
-            <div className="rc-label mb-4 flex items-center gap-2"><Truck size={12} /> Ruta de hoy</div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="rc-label flex items-center gap-2"><Truck size={12} /> Ruta de hoy</div>
+              {myRoute?.start_time && (
+                <span className="font-mono-rc text-xs bg-[#0a0a0a] text-white px-2 py-1" data-testid="driver-route-start-time">
+                  Inicio · {myRoute.start_time}
+                </span>
+              )}
+            </div>
             {!myRoute && <div className="text-sm text-neutral-500 py-12 text-center" data-testid="no-route">No tienes ruta asignada hoy.</div>}
             <div className="space-y-3 max-h-[420px] overflow-auto">
               {myRoute?.stops.map((s, idx) => (
@@ -147,8 +154,13 @@ const DriverDashboard = () => {
                     <div className="font-bold text-sm flex items-center gap-2">
                       <MapPin size={12} className="text-[#ff5a00]" /> {s.address}
                     </div>
-                    <div className="text-[11px] font-mono-rc text-neutral-500 mt-1">
-                      {s.lat.toFixed(4)}, {s.lng.toFixed(4)}
+                    <div className="text-[11px] font-mono-rc text-neutral-500 mt-1 flex items-center gap-2">
+                      <span>{s.lat.toFixed(4)}, {s.lng.toFixed(4)}</span>
+                      {s.scheduled_time && (
+                        <span className="bg-[#ff5a00] text-white px-1.5 py-0.5 text-[10px] font-bold tracking-wider" data-testid={`stop-time-${s.id}`}>
+                          {s.scheduled_time}
+                        </span>
+                      )}
                     </div>
                   </div>
                   {s.status === "pending" ? (
