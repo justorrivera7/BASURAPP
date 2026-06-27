@@ -17,3 +17,6 @@ steps:
   - '-t'
   - 'gcr.io/$PROJECT_ID/BASURAPP:latest'
   - '.'
+# ESTO SOLUCIONA EL ERROR AL APROBAR:
+options:
+  logging: CLOUD_LOGGING_ONLY
