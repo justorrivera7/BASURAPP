@@ -1,4 +1,15 @@
 steps:
+# 1. Diagnostic Step: Print current directory and list all files
+- name: 'ubuntu'
+  script: |
+    echo "=== CURRENT DIRECTORY ==="
+    pwd
+    echo "=== ROOOT FILES ==="
+    ls -la
+    echo "=== FRONTEND FILES ==="
+    ls -la frontend || echo "No frontend folder found!"
+
+# 2. Your original build step
 - name: 'gcr.io/cloud-builders/docker'
   dir: 'frontend'
   args:
