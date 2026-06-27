@@ -15,7 +15,7 @@ steps:
   args:
   - 'build'
   - '-t'
-  - 'gcr.io/$PROJECT_ID/BASURAPP:latest'
+  - 'gcr.io/$PROJECT_ID/basurapp:latest'
   - '.'
 # ESTO SOLUCIONA EL ERROR AL APROBAR:
 options:
