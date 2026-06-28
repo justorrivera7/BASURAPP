@@ -1,6 +1,6 @@
 FROM node:20-alpine AS build
 
-WORKDIR /frontend
+WORKDIR /app
 
 COPY package.json yarn.lock ./
 RUN yarn install
